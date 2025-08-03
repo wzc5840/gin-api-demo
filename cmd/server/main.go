@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/wzc5840/gin-api-demo/pkg/logger"
 	"github.com/wzc5840/gin-api-demo/router"
@@ -18,10 +19,24 @@ func main() {
 		dsn = "host=localhost user=postgres password=postgres dbname=gin_demo port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 	}
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+	var db *gorm.DB
+	var err error
+	maxRetries := 30
+	for i := 0; i < maxRetries; i++ {
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err == nil {
+			break
+		}
+		
+		logger.Infof("Failed to connect to database (attempt %d/%d): %v", i+1, maxRetries, err)
+		time.Sleep(2 * time.Second)
 	}
+
+	if err != nil {
+		log.Fatal("Failed to connect to database after retries:", err)
+	}
+
+	logger.Info("Successfully connected to database")
 
 	r := router.SetupRouter(db)
 

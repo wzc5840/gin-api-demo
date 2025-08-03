@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/wzc5840/gin-api-demo/internal/auth/model"
 	"github.com/wzc5840/gin-api-demo/internal/auth/repository"
+	"github.com/wzc5840/gin-api-demo/internal/user/model"
 	"gorm.io/gorm"
 )
 

@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/wzc5840/gin-api-demo/internal/auth/model"
+	"github.com/wzc5840/gin-api-demo/internal/user/model"
 	"gorm.io/gorm"
 )
 
