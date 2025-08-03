@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/wzc5840/gin-api-demo-01/internal/auth/model"
-	"github.com/wzc5840/gin-api-demo-01/internal/auth/repository"
+	"github.com/wzc5840/gin-api-demo/internal/auth/model"
+	"github.com/wzc5840/gin-api-demo/internal/auth/repository"
 	"gorm.io/gorm"
 )
 
@@ -30,6 +30,18 @@ type RegisterRequest struct {
 type AuthResponse struct {
 	Token string      `json:"token"`
 	User  *model.User `json:"user"`
+}
+
+type UpdateUserRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+type UserListResponse struct {
+	Users []*model.User `json:"users"`
+	Total int64         `json:"total"`
+	Page  int           `json:"page"`
+	Limit int           `json:"limit"`
 }
 
 func NewAuthService(userRepo *repository.UserRepository) *AuthService {
@@ -118,5 +130,89 @@ func (s *AuthService) GetCurrentUser(c *gin.Context) (*model.User, error) {
 		return nil, errors.New("invalid user ID")
 	}
 
+	return s.userRepo.GetUserByID(id)
+}
+
+func (s *AuthService) GetUserList(page, limit int) (*UserListResponse, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 10
+	}
+
+	offset := (page - 1) * limit
+	users, total, err := s.userRepo.GetAllUsers(limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserListResponse{
+		Users: users,
+		Total: total,
+		Page:  page,
+		Limit: limit,
+	}, nil
+}
+
+func (s *AuthService) UpdateUserProfile(userID uint, req *UpdateUserRequest) (*model.User, error) {
+	user, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Username != "" && req.Username != user.Username {
+		existingUser, err := s.userRepo.GetUserByUsername(req.Username)
+		if err == nil && existingUser != nil && existingUser.ID != userID {
+			return nil, errors.New("username already exists")
+		}
+		user.Username = req.Username
+	}
+
+	if req.Email != "" && req.Email != user.Email {
+		existingUser, err := s.userRepo.GetUserByEmail(req.Email)
+		if err == nil && existingUser != nil && existingUser.ID != userID {
+			return nil, errors.New("email already exists")
+		}
+		user.Email = req.Email
+	}
+
+	user.UpdatedAt = time.Now()
+
+	if err := s.userRepo.UpdateUser(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *AuthService) DeleteUser(currentUserID, targetUserID uint) error {
+	if currentUserID == targetUserID {
+		return errors.New("cannot delete your own account")
+	}
+
+	_, err := s.userRepo.GetUserByID(targetUserID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	return s.userRepo.DeleteUser(targetUserID)
+}
+
+func (s *AuthService) GetCurrentUserID(c *gin.Context) (uint, error) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		return 0, errors.New("user not authenticated")
+	}
+
+	id, ok := userID.(uint)
+	if !ok {
+		return 0, errors.New("invalid user ID")
+	}
+
+	return id, nil
+}
+
+func (s *AuthService) GetUserByID(id uint) (*model.User, error) {
 	return s.userRepo.GetUserByID(id)
 }

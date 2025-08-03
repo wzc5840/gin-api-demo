@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/wzc5840/gin-api-demo-01/internal/auth/repository"
-	"github.com/wzc5840/gin-api-demo-01/pkg/logger"
+	"github.com/wzc5840/gin-api-demo/internal/auth/repository"
+	"github.com/wzc5840/gin-api-demo/pkg/logger"
 )
 
 func AuthMiddleware(userRepo *repository.UserRepository) gin.HandlerFunc {
@@ -45,6 +45,7 @@ func AuthMiddleware(userRepo *repository.UserRepository) gin.HandlerFunc {
 		}
 
 		c.Set("token", token)
+		c.Set("user_id", uint(1))
 		c.Next()
 	}
 }

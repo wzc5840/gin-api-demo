@@ -1,4 +1,4 @@
-module github.com/wzc5840/gin-api-demo-01
+module github.com/wzc5840/gin-api-demo
 
 go 1.24.3
 

@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/wzc5840/gin-api-demo-01/internal/auth/model"
+	"github.com/wzc5840/gin-api-demo/internal/auth/model"
 	"gorm.io/gorm"
 )
 
@@ -51,4 +51,16 @@ func (r *UserRepository) UpdateUser(user *model.User) error {
 
 func (r *UserRepository) DeleteUser(id uint) error {
 	return r.db.Delete(&model.User{}, id).Error
+}
+
+func (r *UserRepository) GetAllUsers(limit, offset int) ([]*model.User, int64, error) {
+	var users []*model.User
+	var total int64
+
+	if err := r.db.Model(&model.User{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := r.db.Limit(limit).Offset(offset).Find(&users).Error
+	return users, total, err
 }

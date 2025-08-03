@@ -2,10 +2,10 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/wzc5840/gin-api-demo-01/internal/auth/handler"
-	"github.com/wzc5840/gin-api-demo-01/internal/auth/repository"
-	"github.com/wzc5840/gin-api-demo-01/internal/auth/service"
-	"github.com/wzc5840/gin-api-demo-01/pkg/middleware"
+	"github.com/wzc5840/gin-api-demo/internal/auth/handler"
+	"github.com/wzc5840/gin-api-demo/internal/auth/repository"
+	"github.com/wzc5840/gin-api-demo/internal/auth/service"
+	"github.com/wzc5840/gin-api-demo/pkg/middleware"
 	"gorm.io/gorm"
 )
 
@@ -143,6 +143,10 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		protected.Use(middleware.AuthMiddleware(userRepo))
 		{
 			protected.GET("/profile", authHandler.GetProfile)
+			protected.GET("/list", authHandler.GetUserList)
+			protected.GET("/:id", authHandler.GetUserDetail)
+			protected.PUT("/:id", authHandler.UpdateUser)
+			protected.DELETE("/:id", authHandler.DeleteUser)
 		}
 	}
 

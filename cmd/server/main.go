@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/wzc5840/gin-api-demo-01/pkg/logger"
-	"github.com/wzc5840/gin-api-demo-01/router"
+	"github.com/wzc5840/gin-api-demo/pkg/logger"
+	"github.com/wzc5840/gin-api-demo/router"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
