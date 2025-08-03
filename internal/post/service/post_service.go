@@ -49,7 +49,7 @@ func (s *PostService) CreatePost(userID uint, req *CreatePostRequest) (*model.Po
 		case "draft", "published", "archived":
 			status = model.PostStatus(req.Status)
 		default:
-			return nil, errors.New("invalid post status")
+			return nil, errors.New("無効な投稿ステータスです")
 		}
 	}
 
@@ -141,7 +141,7 @@ func (s *PostService) UpdatePost(userID, postID uint, req *UpdatePostRequest) (*
 	}
 
 	if post.AuthorID != userID {
-		return nil, errors.New("you can only update your own posts")
+		return nil, errors.New("自分の投稿のみ更新できます")
 	}
 
 	if req.Title != "" {
@@ -168,7 +168,7 @@ func (s *PostService) UpdatePost(userID, postID uint, req *UpdatePostRequest) (*
 				post.PublishedAt = &now
 			}
 		default:
-			return nil, errors.New("invalid post status")
+			return nil, errors.New("無効な投稿ステータスです")
 		}
 	}
 
@@ -188,7 +188,7 @@ func (s *PostService) DeletePost(userID, postID uint) error {
 	}
 
 	if post.AuthorID != userID {
-		return errors.New("you can only delete your own posts")
+		return errors.New("自分の投稿のみ削除できます")
 	}
 
 	return s.postRepo.DeletePost(postID)
@@ -197,12 +197,12 @@ func (s *PostService) DeletePost(userID, postID uint) error {
 func (s *PostService) GetCurrentUserID(c *gin.Context) (uint, error) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		return 0, errors.New("user not authenticated")
+		return 0, errors.New("ユーザー認証が必要です")
 	}
 
 	id, ok := userID.(uint)
 	if !ok {
-		return 0, errors.New("invalid user ID")
+		return 0, errors.New("無効なユーザーIDです")
 	}
 
 	return id, nil

@@ -28,15 +28,15 @@ func main() {
 			break
 		}
 		
-		logger.Infof("Failed to connect to database (attempt %d/%d): %v", i+1, maxRetries, err)
+		logger.Infof("データベース接続に失敗しました (試行 %d/%d): %v", i+1, maxRetries, err)
 		time.Sleep(2 * time.Second)
 	}
 
 	if err != nil {
-		log.Fatal("Failed to connect to database after retries:", err)
+		log.Fatal("データベース接続に失敗しました（リトライ後）:", err)
 	}
 
-	logger.Info("Successfully connected to database")
+	logger.Info("データベースに正常に接続しました")
 
 	r := router.SetupRouter(db)
 
@@ -45,8 +45,8 @@ func main() {
 		port = "8080"
 	}
 
-	logger.Info("Server starting on port " + port)
+	logger.Info("サーバーがポート " + port + " で開始されました")
 	if err := r.Run(":" + port); err != nil {
-		log.Fatal("Failed to start server:", err)
+		log.Fatal("サーバーの開始に失敗しました:", err)
 	}
 }

@@ -23,49 +23,49 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	var req service.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("Login bind error:", err)
-		util.BadRequestResponse(c, "Invalid request format")
+		util.BadRequestResponse(c, "無効なリクエスト形式です")
 		return
 	}
 
 	resp, err := h.authService.Login(&req)
 	if err != nil {
 		logger.Error("Login error:", err)
-		util.UnauthorizedResponse(c, "Login failed")
+		util.UnauthorizedResponse(c, "ログインに失敗しました")
 		return
 	}
 
 	logger.Info("User logged in:", resp.User.Username)
-	util.SuccessResponse(c, "Login successful", resp)
+	util.SuccessResponse(c, "ログインしました", resp)
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req service.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("Register bind error:", err)
-		util.BadRequestResponse(c, "Invalid request format")
+		util.BadRequestResponse(c, "無効なリクエスト形式です")
 		return
 	}
 
 	resp, err := h.authService.Register(&req)
 	if err != nil {
 		logger.Error("Register error:", err)
-		util.ConflictResponse(c, "Registration failed")
+		util.ConflictResponse(c, "登録に失敗しました")
 		return
 	}
 
 	logger.Info("User registered:", resp.User.Username)
-	util.CreatedResponse(c, "Registration successful", resp)
+	util.CreatedResponse(c, "登録しました", resp)
 }
 
 func (h *AuthHandler) GetProfile(c *gin.Context) {
 	user, err := h.authService.GetCurrentUser(c)
 	if err != nil {
 		logger.Error("Get profile error:", err)
-		util.UnauthorizedResponse(c, "Unauthorized")
+		util.UnauthorizedResponse(c, "認証が必要です")
 		return
 	}
 
-	util.SuccessResponse(c, "Profile retrieved successfully", user)
+	util.SuccessResponse(c, "プロフィールを取得しました", user)
 }
 
 func (h *AuthHandler) GetUserList(c *gin.Context) {
@@ -75,63 +75,63 @@ func (h *AuthHandler) GetUserList(c *gin.Context) {
 	resp, err := h.authService.GetUserList(page, limit)
 	if err != nil {
 		logger.Error("Get user list error:", err)
-		util.InternalServerErrorResponse(c, "Failed to get user list")
+		util.InternalServerErrorResponse(c, "ユーザーリストの取得に失敗しました")
 		return
 	}
 
-	util.SuccessResponse(c, "User list retrieved successfully", resp)
+	util.SuccessResponse(c, "ユーザーリストを取得しました", resp)
 }
 
 func (h *AuthHandler) GetUserDetail(c *gin.Context) {
 	userIDStr := c.Param("id")
 	userID, err := strconv.ParseUint(userIDStr, 10, 32)
 	if err != nil {
-		util.BadRequestResponse(c, "Invalid user ID")
+		util.BadRequestResponse(c, "無効なユーザーIDです")
 		return
 	}
 
 	user, err := h.authService.GetCurrentUser(c)
 	if err != nil {
 		logger.Error("Get user detail error:", err)
-		util.UnauthorizedResponse(c, "Unauthorized")
+		util.UnauthorizedResponse(c, "認証が必要です")
 		return
 	}
 
 	if user.ID != uint(userID) {
 		targetUser, err := h.authService.GetUserByID(uint(userID))
 		if err != nil {
-			util.NotFoundResponse(c, "User not found")
+			util.NotFoundResponse(c, "ユーザーが見つかりません")
 			return
 		}
 		user = targetUser
 	}
 
-	util.SuccessResponse(c, "User detail retrieved successfully", user)
+	util.SuccessResponse(c, "ユーザー詳細を取得しました", user)
 }
 
 func (h *AuthHandler) UpdateUser(c *gin.Context) {
 	userIDStr := c.Param("id")
 	userID, err := strconv.ParseUint(userIDStr, 10, 32)
 	if err != nil {
-		util.BadRequestResponse(c, "Invalid user ID")
+		util.BadRequestResponse(c, "無効なユーザーIDです")
 		return
 	}
 
 	currentUserID, err := h.authService.GetCurrentUserID(c)
 	if err != nil {
-		util.UnauthorizedResponse(c, "Unauthorized")
+		util.UnauthorizedResponse(c, "認証が必要です")
 		return
 	}
 
 	if currentUserID != uint(userID) {
-		util.UnauthorizedResponse(c, "You can only update your own profile")
+		util.UnauthorizedResponse(c, "自分のプロフィールのみ更新できます")
 		return
 	}
 
 	var req service.UpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("Update user bind error:", err)
-		util.BadRequestResponse(c, "Invalid request format")
+		util.BadRequestResponse(c, "無効なリクエスト形式です")
 		return
 	}
 
@@ -143,36 +143,36 @@ func (h *AuthHandler) UpdateUser(c *gin.Context) {
 	}
 
 	logger.Info("User updated:", user.Username)
-	util.SuccessResponse(c, "User updated successfully", user)
+	util.SuccessResponse(c, "ユーザー情報を更新しました", user)
 }
 
 func (h *AuthHandler) DeleteUser(c *gin.Context) {
 	userIDStr := c.Param("id")
 	targetUserID, err := strconv.ParseUint(userIDStr, 10, 32)
 	if err != nil {
-		util.BadRequestResponse(c, "Invalid user ID")
+		util.BadRequestResponse(c, "無効なユーザーIDです")
 		return
 	}
 
 	currentUserID, err := h.authService.GetCurrentUserID(c)
 	if err != nil {
-		util.UnauthorizedResponse(c, "Unauthorized")
+		util.UnauthorizedResponse(c, "認証が必要です")
 		return
 	}
 
 	err = h.authService.DeleteUser(currentUserID, uint(targetUserID))
 	if err != nil {
 		logger.Error("Delete user error:", err)
-		if err.Error() == "cannot delete your own account" {
-			util.BadRequestResponse(c, "Cannot delete your own account")
-		} else if err.Error() == "user not found" {
-			util.NotFoundResponse(c, "User not found")
+		if err.Error() == "自分のアカウントは削除できません" {
+			util.BadRequestResponse(c, "自分のアカウントは削除できません")
+		} else if err.Error() == "ユーザーが見つかりません" {
+			util.NotFoundResponse(c, "ユーザーが見つかりません")
 		} else {
-			util.InternalServerErrorResponse(c, "Failed to delete user")
+			util.InternalServerErrorResponse(c, "ユーザーの削除に失敗しました")
 		}
 		return
 	}
 
 	logger.Info("User deleted:", targetUserID)
-	util.SuccessResponse(c, "User deleted successfully", map[string]interface{}{})
+	util.SuccessResponse(c, "ユーザーを削除しました", map[string]interface{}{})
 }

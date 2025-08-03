@@ -54,7 +54,7 @@ func (s *AuthService) Login(req *LoginRequest) (*AuthResponse, error) {
 	user, err := s.userRepo.GetUserByUsername(req.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("invalid username or password")
+			return nil, errors.New("ユーザー名またはパスワードが間違っています")
 		}
 		return nil, err
 	}
@@ -74,12 +74,12 @@ func (s *AuthService) Login(req *LoginRequest) (*AuthResponse, error) {
 func (s *AuthService) Register(req *RegisterRequest) (*AuthResponse, error) {
 	existingUser, err := s.userRepo.GetUserByUsername(req.Username)
 	if err == nil && existingUser != nil {
-		return nil, errors.New("username already exists")
+		return nil, errors.New("ユーザー名は既に存在します")
 	}
 
 	existingUser, err = s.userRepo.GetUserByEmail(req.Email)
 	if err == nil && existingUser != nil {
-		return nil, errors.New("email already exists")
+		return nil, errors.New("メールアドレスは既に存在します")
 	}
 
 	hashedPassword := s.hashPassword(req.Password)
@@ -122,12 +122,12 @@ func (s *AuthService) generateToken(user *model.User) string {
 func (s *AuthService) GetCurrentUser(c *gin.Context) (*model.User, error) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		return nil, errors.New("user not authenticated")
+		return nil, errors.New("ユーザー認証が必要です")
 	}
 
 	id, ok := userID.(uint)
 	if !ok {
-		return nil, errors.New("invalid user ID")
+		return nil, errors.New("無効なユーザーIDです")
 	}
 
 	return s.userRepo.GetUserByID(id)
@@ -164,7 +164,7 @@ func (s *AuthService) UpdateUserProfile(userID uint, req *UpdateUserRequest) (*m
 	if req.Username != "" && req.Username != user.Username {
 		existingUser, err := s.userRepo.GetUserByUsername(req.Username)
 		if err == nil && existingUser != nil && existingUser.ID != userID {
-			return nil, errors.New("username already exists")
+			return nil, errors.New("ユーザー名は既に存在します")
 		}
 		user.Username = req.Username
 	}
@@ -172,7 +172,7 @@ func (s *AuthService) UpdateUserProfile(userID uint, req *UpdateUserRequest) (*m
 	if req.Email != "" && req.Email != user.Email {
 		existingUser, err := s.userRepo.GetUserByEmail(req.Email)
 		if err == nil && existingUser != nil && existingUser.ID != userID {
-			return nil, errors.New("email already exists")
+			return nil, errors.New("メールアドレスは既に存在します")
 		}
 		user.Email = req.Email
 	}
@@ -188,12 +188,12 @@ func (s *AuthService) UpdateUserProfile(userID uint, req *UpdateUserRequest) (*m
 
 func (s *AuthService) DeleteUser(currentUserID, targetUserID uint) error {
 	if currentUserID == targetUserID {
-		return errors.New("cannot delete your own account")
+		return errors.New("自分のアカウントは削除できません")
 	}
 
 	_, err := s.userRepo.GetUserByID(targetUserID)
 	if err != nil {
-		return errors.New("user not found")
+		return errors.New("ユーザーが見つかりません")
 	}
 
 	return s.userRepo.DeleteUser(targetUserID)
@@ -202,12 +202,12 @@ func (s *AuthService) DeleteUser(currentUserID, targetUserID uint) error {
 func (s *AuthService) GetCurrentUserID(c *gin.Context) (uint, error) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		return 0, errors.New("user not authenticated")
+		return 0, errors.New("ユーザー認証が必要です")
 	}
 
 	id, ok := userID.(uint)
 	if !ok {
-		return 0, errors.New("invalid user ID")
+		return 0, errors.New("無効なユーザーIDです")
 	}
 
 	return id, nil

@@ -1,3 +1,14 @@
 .git
+.gitignore
 vendor
 *.md
+README.md
+.env
+.DS_Store
+node_modules
+*.log
+.vscode
+.idea
+*.tmp
+*.temp
+gin-api-demo.postman_collection.json
