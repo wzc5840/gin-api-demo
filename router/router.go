@@ -3,11 +3,11 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	authHandler "github.com/wzc5840/gin-api-demo/internal/auth/handler"
-	"github.com/wzc5840/gin-api-demo/internal/auth/repository"
 	authService "github.com/wzc5840/gin-api-demo/internal/auth/service"
 	postHandler "github.com/wzc5840/gin-api-demo/internal/post/handler"
 	postRepository "github.com/wzc5840/gin-api-demo/internal/post/repository"
 	postService "github.com/wzc5840/gin-api-demo/internal/post/service"
+	userRepository "github.com/wzc5840/gin-api-demo/internal/user/repository"
 	"github.com/wzc5840/gin-api-demo/pkg/middleware"
 	"gorm.io/gorm"
 )
@@ -15,7 +15,7 @@ import (
 func SetupRouter(db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 
-	userRepo := repository.NewUserRepository(db)
+	userRepo := userRepository.NewUserRepository(db)
 	authServiceInstance := authService.NewAuthService(userRepo)
 	authHandlerInstance := authHandler.NewAuthHandler(authServiceInstance)
 

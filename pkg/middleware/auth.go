@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/wzc5840/gin-api-demo/internal/auth/repository"
+	"github.com/wzc5840/gin-api-demo/internal/user/repository"
 	"github.com/wzc5840/gin-api-demo/pkg/logger"
 )
 
